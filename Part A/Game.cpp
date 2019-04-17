@@ -83,33 +83,7 @@ bool Game::init(const char * title, int xpos, int ypos, int width, int height, i
 	return true;
 }
 
-void Game::render()
-{
-	// set background color
-	SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
-	
-	// clear previous frame
-	SDL_RenderClear(mainRenderer);
 
-	// draw to the screen here!
-	SDL_SetRenderDrawColor(mainRenderer, 255, 255, 255, 255);
-	SDL_RenderFillRect(mainRenderer,&playerPosition);
-	SDL_RenderFillRect(mainRenderer, &playerTwoPosition);
-	
-	// render new frame
-	SDL_RenderPresent(mainRenderer);
-}
-
-/*
-* update - Process all variables !in charge of anything to do with rendering
-*
-*/
-void Game::update()
-{
-	serial->getPositions();
-	playerPosition.y = serial->getPot1();
-	playerTwoPosition.y = serial->getPot2();
-}
 
 /*
 * handleEvents - Poll Events and uses switch case to process specific events
@@ -145,6 +119,34 @@ void Game::handleEvents()
 		}
 
 	}
+}
+
+/*
+* update - Process all variables !in charge of anything to do with rendering
+*
+*/
+void Game::update()
+{
+	serial->getPositions();
+	playerPosition.y = serial->getPot1();
+	playerTwoPosition.y = serial->getPot2();
+}
+
+void Game::render()
+{
+	// set background color
+	SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
+
+	// clear previous frame
+	SDL_RenderClear(mainRenderer);
+
+	// draw to the screen here!
+	SDL_SetRenderDrawColor(mainRenderer, 255, 255, 255, 255);
+	SDL_RenderFillRect(mainRenderer, &playerPosition);
+	SDL_RenderFillRect(mainRenderer, &playerTwoPosition);
+
+	// render new frame
+	SDL_RenderPresent(mainRenderer);
 }
 
 /*
