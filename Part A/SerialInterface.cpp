@@ -13,7 +13,7 @@ SerialInterface::SerialInterface()
 	while (iter != devicesFound.end())
 	{
 		serial::PortInfo device = *iter++;
-		std::string port = "COM3";
+		std::string port = "COM6";
 
 		try {
 			mySerial = new serial::Serial(port, 9600, serial::Timeout::simpleTimeout(250));

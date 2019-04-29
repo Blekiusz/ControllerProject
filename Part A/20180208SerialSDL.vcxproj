@@ -72,8 +72,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>libraries\SDL2-2.0.7\include;libraries\serial\include;$(IncludePath)</IncludePath>
-    <LibraryPath>libraries\SDL2-2.0.7\lib\x86;libraries\serial\visual_studio\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>libraries\SDL2-2.0.9\include;libraries\serial\include;$(IncludePath)</IncludePath>
+    <LibraryPath>libraries\SDL2-2.0.9\lib\x86;libraries\serial\visual_studio\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -98,7 +98,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;serial.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;serial.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

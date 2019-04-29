@@ -5,7 +5,7 @@
 #include "Player.h"
 #include "Enemy.h"
 #include <list>
-//#include <SDL_ttf.h>
+#include <SDL_ttf.h>
 #include <string>
 
 class Game
@@ -26,6 +26,7 @@ public:
 	bool previousstate;
 
 private:
+	int Menu = 0;//0 = main menu, 1 = game, 2 = game over screen
 	SDL_Window* mainWindow;
 	SDL_Renderer* mainRenderer;
 	bool isRunning;
@@ -35,7 +36,7 @@ private:
 	SDL_Rect * AmmoBar = new SDL_Rect;
 
 	SDL_Rect * Health = new SDL_Rect;
-	//TTF_Font * font = TTF_OpenFont("arial.ttf", 25);
+	TTF_Font * font = TTF_OpenFont("arial.ttf", 25);
 
 };
 
