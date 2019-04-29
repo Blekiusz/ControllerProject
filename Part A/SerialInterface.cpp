@@ -2,6 +2,7 @@
 #include "SerialInterface.h"
 #include <iostream>
 #include <Windows.h>
+#include <string>
 
 SerialInterface::SerialInterface()
 {
@@ -12,7 +13,7 @@ SerialInterface::SerialInterface()
 	while (iter != devicesFound.end())
 	{
 		serial::PortInfo device = *iter++;
-		std::string port = device.port.c_str();
+		std::string port = "COM3";
 
 		try {
 			mySerial = new serial::Serial(port, 9600, serial::Timeout::simpleTimeout(250));
@@ -43,48 +44,47 @@ void SerialInterface::send(std::string msg)
 	}
 }
 
-void SerialInterface::getButton()
+float SerialInterface::getPositionX()
 {
+	if (connect)
+	{
+		mySerial->write("X");
+		std::string result = mySerial->readline();
+		float x = std::stof(result);
+		return -x;
+	}
+}
+
+float SerialInterface::getPositionY()
+{
+	if (connect)
+	{
+		mySerial->write("Y");
+		std::string result = mySerial->readline();
+		float y = std::stof(result);
+		return y;
+	}
+}
+
+bool SerialInterface::getTrigger() {
 	if (connect)
 	{
 		mySerial->write("B");
-
 		std::string result = mySerial->readline();
-
-		//std::vector<std::string> pos = split(result, ';');
-
-		std::string b1 = result.substr(0, 1);
-		std::string b2 = result.substr(2, 1);
-
-		button1 = std::stoi(b1);
-		button2 = std::stoi(b2);
-		//std::cout << button1 << std::endl;
+		std::cout << result << std::endl;
+		if (result.find('1')) return true;
+		else return false;
 	}
 }
 
-void SerialInterface::getPositions()
-{
+bool SerialInterface::getIR() {
 	if (connect)
 	{
-		mySerial->write("P");
-
+		mySerial->write("R");
 		std::string result = mySerial->readline();
-
-		if (result.length() > 5) {
-			std::string sub1 = result.substr(0, 4);
-			pot1 = std::stoi(sub1);
-
-			std::string sub2 = result.substr(5, 9);
-			pot2 = std::stoi(sub2);
-		}
-		
-		
-
+		if (result.find('1')) return true;
+		else return false;
 	}
-}
-
-void SerialInterface::led() {
-	mySerial->write("L");
 }
 
 void SerialInterface::close()

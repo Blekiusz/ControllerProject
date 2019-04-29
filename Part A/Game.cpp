@@ -12,7 +12,6 @@ Game::Game()
 {
 	
 }
-
 /*
 	Decontructor - also not used in this case
 */
@@ -71,19 +70,27 @@ bool Game::init(const char * title, int xpos, int ypos, int width, int height, i
 
 	initSerialConnection();
 
-	playerPosition.x = 100;
-	playerPosition.y = 100;
-	playerPosition.w = 25;
-	playerPosition.h = 25;
+	User->LoadImage(mainRenderer, User->position.x, User->position.y, "c.bmp");
 
-	playerTwoPosition.x = 300;
-	playerTwoPosition.y = 100;
-	playerTwoPosition.w = 25;
-	playerTwoPosition.h = 25;
+	for (int i = 0; i < 10; i++)
+	{
+		EnemyList[i] = new Enemy;
+		EnemyList[i]->LoadImage(mainRenderer, EnemyList[i]->position.x, EnemyList[i]->position.y, "e.bmp");
+		EnemyList[i]->RandomSpawnOffScreen(EnemyList[i]);
+	}
+	User->Reload();
+
+	AmmoBar->x = 580;
+	AmmoBar->y = 600;
+	AmmoBar->w = 20;
+
+	Health->x = 0;
+	Health->y = 600;
+	Health->w = 20;
+	//TTF_Init();
+
 	return true;
 }
-
-
 
 /*
 * handleEvents - Poll Events and uses switch case to process specific events
@@ -103,15 +110,9 @@ void Game::handleEvents()
 		case SDL_KEYDOWN:
 			if (event.key.keysym.sym == SDLK_w)
 			{
-				playerPosition.y -= 5.0f;
 			}
 			else if (event.key.keysym.sym == SDLK_s)
 			{
-				playerPosition.y += 5.0f;
-			}
-			if (event.key.keysym.sym == SDLK_a)
-			{
-				serial->led();
 			}
 			break;
 		default:
@@ -127,26 +128,92 @@ void Game::handleEvents()
 */
 void Game::update()
 {
-	serial->getPositions();
-	playerPosition.y = serial->getPot1();
-	playerTwoPosition.y = serial->getPot2();
+	User->rect->x += serial->getPositionX();
+	User->rect->y += serial->getPositionY();
+	if (0 > User->rect->x) {
+		User->rect->x = 0;
+	}
+	else if(User->rect->x + User->rect->w > 600 ){
+		User->rect->x = 600 - User->rect->w;
+	}
+	if (0 > User->rect->y) {
+		User->rect->y = 0;
+	}
+	else if (User->rect->y + User->rect->w > 600) {
+		User->rect->y = 600 - User->rect->w;
+	}
+	if (!serial->getTrigger() && User->GetBullets() > 0) {
+		User->ShootBullets();
+
+		for (int i = 0; i < 10; i++)
+		{
+			bool x = SDL_HasIntersection(EnemyList[i]->rect, User->rect);
+			if (x) {
+				EnemyList[i]->RandomSpawnOffScreen(EnemyList[i]);
+			}
+		}
+	}
+
+	if (serial->getIR() && !previousstate) { User->Reload(); }
+
+	for (int i = 0; i < 10; i++)
+	{
+		EnemyList[i]->Move();
+	}
+
+	previousstate = serial->getIR();
+
+	
+	AmmoBar->h = (-600.f * (User->GetBullets() / 30.f));
+	Health->h = (-600.f * (User->GetHealth() / 10.f));
 }
 
 void Game::render()
 {
 	// set background color
-	SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
+
+	SDL_SetRenderDrawColor(mainRenderer, 255, 255, 255, 255);
 
 	// clear previous frame
 	SDL_RenderClear(mainRenderer);
 
 	// draw to the screen here!
-	SDL_SetRenderDrawColor(mainRenderer, 255, 255, 255, 255);
-	SDL_RenderFillRect(mainRenderer, &playerPosition);
-	SDL_RenderFillRect(mainRenderer, &playerTwoPosition);
+	User->Render(mainRenderer, 45);
+	for (int i = 0; i < 10; i++)
+	{
+		EnemyList[i]->Render(mainRenderer, 0);
+		if (EnemyList[i]->rect->y > 600) {
+			User->GetDamaged();
+			EnemyList[i]->RandomSpawnOffScreen(EnemyList[i]);
+		}
+	}
+
+	SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
+	
+	SDL_RenderFillRect(mainRenderer, AmmoBar);
+
+	SDL_SetRenderDrawColor(mainRenderer, 255, 0, 0, 255);
+
+	SDL_RenderFillRect(mainRenderer, Health);
+
+	//showing scores
+	std::string scorestr = "Score: " + std::to_string(score);
+	const char *array = scorestr.c_str();
+
+	//SDL_Surface * surface = TTF_RenderText_Solid(font, array, {0,0,0});
+	//SDL_Texture * texture = SDL_CreateTextureFromSurface(mainRenderer, surface);
+
+	int textW = 0;
+	int textH = 0;
+	//SDL_QueryTexture(texture, NULL, NULL, &textW, &textH);
+	SDL_Rect dstrect = { 300 - (textW / 2), 0, textW, textH };
+
+	//SDL_RenderCopy(mainRenderer, texture, NULL, &dstrect);
 
 	// render new frame
 	SDL_RenderPresent(mainRenderer);
+	//SDL_DestroyTexture(texture);
+	//SDL_FreeSurface(surface);
 }
 
 /*
@@ -156,6 +223,8 @@ void Game::render()
 void Game::clean()
 {	
 	cout << "Cleaning SDL \n";
+	
+	//TTF_Quit();
 	SDL_DestroyWindow(mainWindow);
 	SDL_DestroyRenderer(mainRenderer);
 	SDL_Quit();

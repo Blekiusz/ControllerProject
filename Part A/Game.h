@@ -2,6 +2,11 @@
 #include "SDL.h"
 #include <serial\serial.h>
 #include "SerialInterface.h"
+#include "Player.h"
+#include "Enemy.h"
+#include <list>
+//#include <SDL_ttf.h>
+#include <string>
 
 class Game
 {
@@ -17,15 +22,20 @@ public:
 
 	bool initSerialConnection();
 	bool running() { return isRunning; };
+	int score = 0;
+	bool previousstate;
 
 private:
 	SDL_Window* mainWindow;
 	SDL_Renderer* mainRenderer;
 	bool isRunning;
-
+	Enemy * EnemyList[10];
 	SerialInterface* serial;
+	Player* User = new Player;
+	SDL_Rect * AmmoBar = new SDL_Rect;
 
-	SDL_Rect playerPosition;
-	SDL_Rect playerTwoPosition;
+	SDL_Rect * Health = new SDL_Rect;
+	//TTF_Font * font = TTF_OpenFont("arial.ttf", 25);
+
 };
 

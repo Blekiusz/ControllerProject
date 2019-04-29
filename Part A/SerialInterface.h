@@ -15,12 +15,10 @@ public:
 	bool connect = false;
 
 	void send(std::string msg);
-	void getPositions();
-	void led();
-	void getButton();
-
-	int getPot1() { return pot1; };
-	int getPot2() { return pot2; };
+	float getPositionX();
+	float getPositionY();
+	bool getTrigger();
+	bool getIR();
 
 	void close();
 
@@ -29,8 +27,11 @@ public:
 private:
 	serial::Serial* mySerial;
 
-	int pot1 = 0;
-	int pot2 = 0;
+	float xposition = 0;
+	float yposition = 0;
+	bool trigger = false;
+	bool reload = true;
+
 	int button1;
 	int button2;
 };
