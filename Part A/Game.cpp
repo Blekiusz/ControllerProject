@@ -2,6 +2,7 @@
 #include "Game.h"
 #include <iostream>
 #include "SDL_image.h"
+#include <stdio.h>
 
 
 using std::cout;
@@ -92,14 +93,13 @@ bool Game::init(const char * title, int xpos, int ypos, int width, int height, i
 
 	Menu = 0;
 
-	//TTF_Init();
-
+	TTF_Init();
+	font = TTF_OpenFont("arial.ttf", 24);
 	return true;
 }
 
 /*
-* handleEvents - Poll Events and uses switch case to process specific events
-*
+* Used to switch off the game with esc button
 */
 void Game::handleEvents()
 {
@@ -109,16 +109,6 @@ void Game::handleEvents()
 		switch (event.type) {
 		case SDL_QUIT:
 			isRunning = false;
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-			break;
-		case SDL_KEYDOWN:
-			if (event.key.keysym.sym == SDLK_w)
-			{
-			}
-			else if (event.key.keysym.sym == SDLK_s)
-			{
-			}
 			break;
 		default:
 			break;
@@ -133,12 +123,18 @@ void Game::handleEvents()
 */
 void Game::update()
 {
-
+	//main menu functionalities
 	if (Menu == 0) {
 		if (!serial->getTrigger()) {
 			Menu++;
+			for (int i = 0; i < 10; i++)
+			{
+				EnemyList[i]->RandomSpawnOffScreen(EnemyList[i]);
+			}
 		}
 	}
+
+	//in game functions
 	else if (Menu == 1) {
 		User->rect->x += serial->getPositionX();
 		User->rect->y += serial->getPositionY();
@@ -162,6 +158,7 @@ void Game::update()
 				bool x = SDL_HasIntersection(EnemyList[i]->rect, User->rect);
 				if (x) {
 					EnemyList[i]->RandomSpawnOffScreen(EnemyList[i]);
+					score += 10;
 				}
 			}
 		}
@@ -181,26 +178,27 @@ void Game::update()
 
 		if (User->GetHealth() == 0) {
 			Menu++;
-			for (int i = 0; i < 5; i++)
+			for (int i = 0; i < 10; i++)
 			{
-
 				User->GetHealed();
 			}
 
 		}
 	}
+
+	// game over screen
 	else if (Menu == 2) {
-		if (!serial->getTrigger()) {
-			Menu = 0;
-		}
+		if (serial->getIR() && !previousstate) { Menu = 0; score = 0; }
+		previousstate = serial->getIR();
 	}
 	
 }
 
 void Game::render()
 {
-	if (Menu == 1) {
-		SDL_Surface* surface = NULL;
+	//shows image in main menu
+	if (Menu == 0) {
+		SDL_Surface* surface = SDL_LoadBMP("s.bmp");
 		SDL_Texture* texture = SDL_CreateTextureFromSurface(mainRenderer, surface);
 		SDL_FreeSurface(surface);
 		SDL_Rect destination;
@@ -210,7 +208,12 @@ void Game::render()
 		destination.h = 600;
 
 		SDL_RenderCopy(mainRenderer, texture, NULL, &destination);
+		SDL_RenderPresent(mainRenderer);
+
+		SDL_DestroyTexture(texture);
 	}
+
+	//shows player, enemies, health and ammo bar and score
 	else if (Menu == 1) {
 		// set background color
 
@@ -241,24 +244,73 @@ void Game::render()
 		//showing scores
 		std::string scorestr = "Score: " + std::to_string(score);
 		const char *array = scorestr.c_str();
+		SDL_Color color = { 0,0,0 };
 
-		//SDL_Surface * surface = TTF_RenderText_Solid(font, array, {0,0,0});
-		//SDL_Texture * texture = SDL_CreateTextureFromSurface(mainRenderer, surface);
+		SDL_Surface * surface = TTF_RenderText_Solid(font, array, color);
+		SDL_Texture * texture = SDL_CreateTextureFromSurface(mainRenderer, surface);
 
 		int textW = 0;
 		int textH = 0;
-		//SDL_QueryTexture(texture, NULL, NULL, &textW, &textH);
+		SDL_QueryTexture(texture, NULL, NULL, &textW, &textH);
 		SDL_Rect dstrect = { 300 - (textW / 2), 0, textW, textH };
 
-		//SDL_RenderCopy(mainRenderer, texture, NULL, &dstrect);
+		SDL_RenderCopy(mainRenderer, texture, NULL, &dstrect);
 
 		// render new frame
 		SDL_RenderPresent(mainRenderer);
-		//SDL_DestroyTexture(texture);
-		//SDL_FreeSurface(surface);
+		SDL_DestroyTexture(texture);
+		SDL_FreeSurface(surface);
 	}
-	else if (Menu == 2) {
 
+	// shows background image, shows score achieved and information to reload to go to main menu
+	else if (Menu == 2) {
+		SDL_Surface* surface = SDL_LoadBMP("o.bmp");
+		SDL_Texture* texture = SDL_CreateTextureFromSurface(mainRenderer, surface);
+		SDL_FreeSurface(surface);
+		SDL_Rect destination;
+		destination.x = 0;
+		destination.y = 0;
+		destination.w = 600;
+		destination.h = 600;
+		SDL_RenderCopy(mainRenderer, texture, NULL, &destination);
+
+		std::string scorestr = "You have achieved score of: " + std::to_string(score);
+		const char *array = scorestr.c_str();
+		SDL_Color color = { 255,255,255 };
+
+		SDL_Surface * nsurface = TTF_RenderText_Solid(font, array, color);
+		SDL_Texture * ntexture = SDL_CreateTextureFromSurface(mainRenderer, nsurface);
+
+		int textW = 0;
+		int textH = 0;
+		SDL_QueryTexture(ntexture, NULL, NULL, &textW, &textH);
+		SDL_Rect dstrect = { 300 - (textW / 2), 400, textW, textH };
+
+		SDL_RenderCopy(mainRenderer, ntexture, NULL, &dstrect);
+
+		std::string m = "Reload to go to main menu.";
+		const char *narray = m.c_str();
+
+		SDL_Surface * nnsurface = TTF_RenderText_Solid(font, narray, color);
+		SDL_Texture * nntexture = SDL_CreateTextureFromSurface(mainRenderer, nnsurface);
+
+		int ntextW = 0;
+		int ntextH = 0;
+		SDL_QueryTexture(nntexture, NULL, NULL, &ntextW, &ntextH);
+		SDL_Rect ddstrect = { 300 - (textW / 2), 500, ntextW, ntextH };
+
+
+		SDL_RenderCopy(mainRenderer, nntexture, NULL, &ddstrect);
+
+		SDL_RenderPresent(mainRenderer);
+
+		SDL_DestroyTexture(texture);
+
+		SDL_DestroyTexture(ntexture);
+		SDL_FreeSurface(nsurface);
+
+		SDL_DestroyTexture(nntexture);
+		SDL_FreeSurface(nnsurface);
 	}
 }
 

@@ -13,6 +13,7 @@ Enemy::~Enemy()
 {
 }
 
+//Function removes green background from the picture creates a texture and sets ups variables used because of issues caused by SDL_image
 void Enemy::LoadImage(SDL_Renderer * renderer, int pos_x, int pos_y, const char * image_path)
 {
 	image = SDL_LoadBMP(image_path);
@@ -25,11 +26,13 @@ void Enemy::LoadImage(SDL_Renderer * renderer, int pos_x, int pos_y, const char 
 	center = new SDL_Point{ rect->w / 2, rect->h / 2 };
 }
 
+//Function renders the picture and rotates it if needed
 void Enemy::Render(SDL_Renderer * renderer, double rotation)
 {
 	SDL_RenderCopyEx(renderer, texture, NULL, rect, rotation, center, SDL_FLIP_NONE);
 }
 
+//function respawns enemy off screen giving it new random speed
 void Enemy::RandomSpawnOffScreen(Enemy * Enemy)
 {
 	Enemy->rect->x = rand() % 520;

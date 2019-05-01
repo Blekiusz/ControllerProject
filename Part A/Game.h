@@ -36,7 +36,6 @@ private:
 	SDL_Rect * AmmoBar = new SDL_Rect;
 
 	SDL_Rect * Health = new SDL_Rect;
-	TTF_Font * font = TTF_OpenFont("arial.ttf", 25);
-
+	TTF_Font * font;
 };
 

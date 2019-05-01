@@ -13,6 +13,7 @@ Player::~Player()
 {
 }
 
+//Function removes green background from the picture creates a texture and sets ups variables used because of issues caused by SDL_image
 void Player::LoadImage(SDL_Renderer * renderer, int pos_x, int pos_y, const char * image_path)
 {
 	image = SDL_LoadBMP(image_path);
@@ -25,6 +26,7 @@ void Player::LoadImage(SDL_Renderer * renderer, int pos_x, int pos_y, const char
 	center = new SDL_Point{ rect->w / 2, rect->h / 2 };
 }
 
+//Function renders the picture and rotates it if needed
 void Player::Render(SDL_Renderer * renderer, double rotation)
 {
 	SDL_RenderCopyEx(renderer, texture, NULL, rect, rotation, center, SDL_FLIP_NONE);

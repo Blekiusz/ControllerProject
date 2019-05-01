@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <string>
 
+//Function Initialises Serial
 SerialInterface::SerialInterface()
 {
 	std::vector <serial::PortInfo> devicesFound = serial::list_ports();
@@ -13,7 +14,9 @@ SerialInterface::SerialInterface()
 	while (iter != devicesFound.end())
 	{
 		serial::PortInfo device = *iter++;
-		std::string port = "COM6";
+		
+		//due to some issues I had hardcode port that arduino connects to
+		std::string port = "COM3";
 
 		try {
 			mySerial = new serial::Serial(port, 9600, serial::Timeout::simpleTimeout(250));
@@ -36,14 +39,7 @@ SerialInterface::~SerialInterface()
 
 }
 
-void SerialInterface::send(std::string msg)
-{
-	if (connect)
-	{
-		mySerial->write(msg);
-	}
-}
-
+//gets value from arduino to move character in x axis
 float SerialInterface::getPositionX()
 {
 	if (connect)
@@ -55,6 +51,7 @@ float SerialInterface::getPositionX()
 	}
 }
 
+//gets value from arduino to move character in y axis
 float SerialInterface::getPositionY()
 {
 	if (connect)
@@ -66,6 +63,7 @@ float SerialInterface::getPositionY()
 	}
 }
 
+//gets value from arduino to decide whether player is holding the button or not
 bool SerialInterface::getTrigger() {
 	if (connect)
 	{
@@ -77,6 +75,7 @@ bool SerialInterface::getTrigger() {
 	}
 }
 
+//gets value from arduino to decide whether magazine is in or not
 bool SerialInterface::getIR() {
 	if (connect)
 	{
